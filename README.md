@@ -381,6 +381,10 @@ Reversible experiment, sensor B at 13.68 V: writing a table shifted up by 1.25 V
 the reading from 100 % to **63 %** — exactly what the model predicted. Writing the
 original frames back restored 100 %.
 
+Second run, sensor B at 12.78 V, code 4, written by our own firmware without `01`/`02`:
+the default table gave 88 %, the same table shifted up by 0.5 V gave 38 % — exactly the
+linear interpolation; acknowledged both times.
+
 - **Takes effect immediately**, from the next frame, no restart.
 - **No `02` unlock needed** — we never sent it.
 - **One acknowledgement `d1550800`, after the SECOND packet**; the first gets no reply.
