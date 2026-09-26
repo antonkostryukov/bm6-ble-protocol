@@ -264,18 +264,33 @@ Throughput: 739 records in 491 ms; about 1500 records/s on deep reads (50467 rec
 
 ### Depth
 
-**How much the sensor can store: not established.** You cannot read more than 65535
-records (**91 days** at 2 min) — the index is 16-bit; that is the read limit, not the
-storage limit. The app's sync modes "31 days" and "72 days" (51840 records) fit inside it.
+**At the limit the sensor erases the oldest 1024 records at once** and keeps logging.
+Reads of sensor A:
 
-**Measured on sensor A: 50467 records = 70.1 days**, oldest 17 July 2026. That is what
-had accumulated, not a limit: two reads 43272 s apart — the count grew by 361 against
-360.6 expected, and the oldest records of both dumps matched by content. The window does
-not slide, records are added. What happens at the limit — overwrite or stop — not
-established.
+| when | records | oldest |
+|---|---|---|
+| 25 Sep 2026 01:48 | 50106 | 17 Jul 11:38 |
+| 25 Sep 2026 13:50 | 50467 | 17 Jul 11:38 |
+| 25 Sep 2026 17:58 | 50590 | 17 Jul 11:38 |
+| 26 Sep 2026 16:58 | 50257 | 18 Jul 21:46 |
+
+Below the limit the count grows by one record per 2 minutes and the oldest record stays
+put (361 over 43272 s against 360.6 expected; the first records of both dumps matched by
+content). Between 25 Sep 17:58 and 26 Sep 16:58 the oldest record moved forward by
+34 h 08 min — exactly 1024 records — and the count became 50257 instead of the expected
+51280; the 2-minute step in the dump has no gaps. 1024 × 4 bytes = 4 KB, a flash erase
+block — a plausible explanation, not verified.
+
+**The limit is between 50591 and 51281 records; hypothesis: 51200** (50 blocks of 1024,
+71.1 days). It fits every read above: sensor A's history started on 17 Jul 11:38 and would
+have reached 51200 records on 26 Sep around 14:16. Test: the count climbs to 51200 and
+drops to 50176 — due on sensor A around 28 Sep 00:20. You cannot read more than 65535
+records (91 days) anyway — the index is 16-bit. The app's sync modes "31 days" and
+"72 days" (51840 records) fit.
 
 **Weeks and months while the sensor keeps power** — per the owner, who has opened the app
-after 1–2 months and got the whole history.
+after 1–2 months and got the whole history. Measured: about 71 days on sensor A before the
+first erase.
 
 **After a power loss the history starts over** — seen once: sensor B, disconnected on day
 one and powered from a bench supply two days later, returned history only from the moment
