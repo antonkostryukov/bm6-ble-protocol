@@ -218,13 +218,20 @@ carries the sign in a separate byte; the record has no room for one. No negative
 seen (in 50467 records of sensor A the top bit of the temperature byte is never set).
 Reading it as two's complement would be a guess.
 
-**Flags: `2` — engine start point, `4` — engine stop point.** The APK parser compares the
-**low three bits** with the strings `010` and `100`. Confirmed on the bench: dropping the
-supply from 13.98 to 12.0 V produced `4`, raising it to 14.2 V produced `2`.
+**Flags: `2` — "start", `4` — "stop"** — as the app names them; the APK parser compares the
+**low three bits** with the strings `010` and `100`. **The sensor sets them on a voltage
+step; it knows nothing about the engine.** On the bench, with no engine: a drop from 13.98
+to 12.0 V gave `4`, a rise to 14.2 V gave `2`; a drop from 13.48 to 12.79 V gave `4`; the
+first record after power-up (0 to 13.48 V) gave `2`. On sensor A all 9 flags from 21 Jul
+to 29 Aug are false: the car was not started after 15 Jul — these were charger
+connections (battery kept at 13.45 V in storage) and capacity experiments (per the owner).
+A real engine start is caught differently — by the fast cranking buffer, see `03`; history
+flags and that buffer are separate things. Step thresholds not established.
 
 **An all-zero record** is a real record in the middle of the data, not the end. It appears
-at a sharp voltage change (reproduced twice); on sensor A all 4 zero records out of 50467
-sit right before an engine-stop record. Meaning not established. The app skips them.
+at a sharp voltage change, right before a record flagged `4` (three times on the bench; on
+sensor A all 4 zero records out of 50467 sit right before a `4`). Meaning not established.
+The app skips them.
 
 ### Reply
 
